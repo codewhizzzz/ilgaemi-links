@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>일개미의 비싼 주식 노트 · 이동 중</title>
+<style>
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Apple SD Gothic Neo","Malgun Gothic",sans-serif;background:#f2f5f7;color:#273a46;
+       display:flex;min-height:100vh;align-items:center;justify-content:center;text-align:center;padding:24px;box-sizing:border-box}
+  a{color:#2565a0;font-weight:700}
+  p{line-height:1.8;margin:8px 0}
+</style>
+</head>
+<body>
+<div>
+  <p id="msg">글로 이동하는 중이에요…</p>
+  <p><a id="go" href="https://blog.naver.com/mk_000-">바로 열리지 않으면 여기를 눌러 주세요</a></p>
+</div>
+<script>
+// 일개미 블로그의 "이어서 읽으면" 링크용 중간 주소.
+// ?p=<글 고정 ID>&t=<글 제목> 을 받아, links.json(고정 ID → 네이버 글 번호)에서 글을 찾아 바로 넘겨 준다.
+// 아직 목록에 없는 글(방금 올린 글)은 블로그 안에서 제목으로 찾은 화면으로 보낸다.
+(function () {
+  var BLOG = "mk_000-";
+  var q = new URLSearchParams(location.search);
+  var id = q.get("p") || "", title = q.get("t") || "";
+  var home = "https://blog.naver.com/" + BLOG;
+  var search = title ? "https://blog.naver.com/PostSearchList.naver?blogId=" + BLOG + "&orderType=sim&searchText=" + encodeURIComponent(title) : home;
+  var link = document.getElementById("go");
+  function go(url) { link.href = url; location.replace(url); }
+  if (!id) { go(search); return; }
+  fetch("links.json?ts=" + Date.now(), { cache: "no-store" })
+    .then(function (r) { return r.json(); })
+    .then(function (map) {
+      var no = map[id];
+      go(/^\d+$/.test(no || "") ? home + "/" + no : search);
+    })
+    .catch(function () { go(search); });
+})();
+</script>
+</body>
+</html>
